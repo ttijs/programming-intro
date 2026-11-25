@@ -99,6 +99,9 @@
     /* whose quiz this is: under the window until developer mode, in the top bar after that */
     #brand { justify-self: center; font-size: 19.2px; color: var(--ink); }
     #brand .real { display: block; height: 46px; image-rendering: auto; }   /* the logo file itself, not pixel art */
+    #brand .real-brand { display: flex; align-items: center; justify-content: center; gap: 14px; }
+    #brand .real-brand img { display: block; height: 46px; image-rendering: auto; }
+    #brand .real-brand strong { font-weight: normal; line-height: .9; text-transform: uppercase; }
     body.dev #brand { display: none; }
 
     /* ── THE QUIZ ── deliberately the dullest thing on the page */
@@ -741,8 +744,19 @@ function bump(el) {
 // The logo under the quiz window. While the quiz still looks normal so does the logo: it is the
 // organisation's own file. Once things break it is made of pixels, as it is behind the scenes.
 function showBrand(pixels) {
-  $('#brand').innerHTML = pixels || !SETTINGS.logoImage ? Card.logo()
-    : `<img class="real" src="${SETTINGS.logoImage}" alt="${esc(SETTINGS.organisation)}">`;
+  if (pixels) {
+    $('#brand').innerHTML = Card.logo();
+  } else {
+    const organisations = [
+      [SETTINGS.organisation, SETTINGS.logoImage],
+      [SETTINGS.organisation2, SETTINGS.logoImage2],
+    ].filter(([name, image]) => name && image);
+    $('#brand').innerHTML = organisations.length
+      ? `<div class="real-brand">${organisations.map(([name, image]) =>
+          `<span><img class="real" src="${esc(image)}" alt="${esc(name)}"></span>`
+        ).join('')}</div>`
+      : Card.logo();
+  }
 }
 
 // ── the duck ──

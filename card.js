@@ -146,10 +146,24 @@ const Card = (() => {
     '....########....',
   ];
   const mark = { dark: picture(MARK.map(row => row.replace(/#/g, 'k'))), light: picture(MARK.map(row => row.replace(/#/g, 'w'))) };
+  const maMark = (() => {
+    const c = document.createElement('canvas'), g = c.getContext('2d');
+    c.width = c.height = 32;
+    g.fillStyle = '#e91e78';
+    g.fillRect(0, 0, 32, 32);
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 15px Arial';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('M', 10, 16);
+    g.fillText('A', 22, 16);
+    return { dark: c.toDataURL(), light: c.toDataURL() };
+  })();
   // `light` is for dark backgrounds. Without an organisation in settings.js there is no logo.
-  const logo = (light = false) => SETTINGS.organisation
-    ? `<span class="logo"><img src="${light ? mark.light : mark.dark}" alt=""><strong>${SETTINGS.organisation.trim().split(/\s+/).join('<br>')}</strong></span>`
+  const oneLogo = (light, organisation, customMark) => organisation
+    ? `<span class="logo"><img src="${customMark ? (light ? customMark.light : customMark.dark) : (light ? mark.light : mark.dark)}" alt=""><strong>${organisation.trim().split(/\s+/).join('<br>')}</strong></span>`
     : '';
+  const logo = (light = false) => `<span class="logos">${oneLogo(light, SETTINGS.organisation)}${oneLogo(light, SETTINGS.organisation2, maMark)}</span>`;
 
   // ── the card itself ──
   // The words on a card are in text.js (L.card), in the language in use. There is one rumor
@@ -193,7 +207,9 @@ const Card = (() => {
   }
 
   // Every size is in em, so the card is as big as its font-size says: 1em is 2mm on paper.
-  document.head.insertAdjacentHTML('beforeend', `<style>
+  document.head.insertAdjacentHTML(
+      "beforeend",
+      `<style>
     .keycard {
       font-size: 2mm; width: 31.5em; height: 44em; padding: 1.5em; flex: none;
       background: #fffdf4; color: #1a1420; font-family: 'Jersey 10', Arial, sans-serif; line-height: 1;
@@ -215,9 +231,9 @@ const Card = (() => {
     .kc-strip { border-collapse: collapse; width: 100%; table-layout: fixed; }
     .kc-strip td { font: bold 2.15em/1.52 ui-monospace, Menlo, Consolas, monospace; text-align: center; border: .08em solid #1a1420; padding: 0; }
     .kc-dark td { background: #1a1420; color: #fff; }
-    .kc-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 1.2em; }
+    .kc-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 2.2em; }
     .kc-rumor { font-size: 1.5em; line-height: 1.05; }
-    .kc-foot .logo { font-size: 1.4em; flex: none; }
+    .kc-foot .logo { font-size: 1.1em; flex: none; }
 
     .kc-back .kc-head { padding: 1.3em 1.5em; }
     .kc-name { font-size: 1.5em; text-transform: uppercase; letter-spacing: .08em; border-bottom: .14em solid #1a1420; padding: 1.2em 0 .3em; }
@@ -228,16 +244,20 @@ const Card = (() => {
     .kc-words { font-size: 1.6em; line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; }
     .kc-words span { display: block; text-transform: none; letter-spacing: 0; color: #5b5566; }
     .kc-from { align-items: center; justify-content: flex-start; }
-    .kc-from .logo { font-size: 1.5em; }
+    .kc-from .logo { font-size: 1.05em; }
     .kc-invite span { display: block; font-size: 1.4em; line-height: 1.05; }
     .kc-invite i { display: block; margin-top: .3em; font-size: 1.4em; font-style: normal; }
     .kc-invite i:empty { display: none; }
 
     /* The logo is as big as its font-size says, like the card: the mark is three lines of text tall. */
+    .logos { display: inline-flex; align-items: center; justify-content: flex-start; flex-wrap: nowrap; gap: .55em .9em; max-width: 15em;  flex: 0 }
+    .kc-foot .logos { flex-wrap: wrap; }
+    .logos:empty { display: none; }
     .logo { display: inline-flex; align-items: center; gap: .6em; font-family: 'Jersey 10', Arial, sans-serif; }
     .logo img { width: 2.5em; height: 2.5em; flex: none; image-rendering: pixelated; }
     .logo strong { font-weight: normal; line-height: .83; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
-  </style>`);
+  </style>`,
+  );
 
   return { ABC, DECK, RESERVED, DUCK, POWER, code, read, key, shift, grid, bug, picture, logo, front, back };
 })();
